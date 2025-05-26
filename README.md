@@ -43,29 +43,30 @@ Want to use your own coin graphics?
 
 Replace these files:
 
-modules/story-points/icons/player.png
-modules/story-points/icons/gm.png
+     modules/story-points/icons/player.png
+
+     modules/story-points/icons/gm.png
 
  Recommended: Transparent PNGs at least 64x64 pixels.
  Sound Effect
 
 To customize the flip sound, replace:
 
-modules/story-points/sounds/flip.ogg
+     modules/story-points/sounds/flip.ogg
 
  Adding More Coins
 
 Want more than 3 coins? It’s easy!
 
-    Open the module’s story-points.js file.
+Open the module’s story-points.js file.
 
-    Locate the coinStates object near the top:
+Locate the coinStates object near the top:
 
-let coinStates = {
-  coin1: "gm",
-  coin2: "gm",
-  coin3: "gm"
-};
+     let coinStates = {
+       coin1: "gm",
+       coin2: "gm",
+       coin3: "gm"
+     };
 
 Add more coins by following the same format:
 
@@ -83,9 +84,9 @@ Each coin will appear in the floating window automatically and behave the same w
 
  Compatibility
 
-    Compatible with Foundry VTT v10–v13.
+    Compatible with Foundry VTT v10–v13+.
 
-    Does not require SocketLib or any dependencies.
+    Does not require any dependencies.
 
  Credit
 
