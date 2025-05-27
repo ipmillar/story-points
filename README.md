@@ -1,94 +1,69 @@
-Story Points – Foundry VTT Module
+🪙 Story Points – Foundry VTT Module
 
-Story Points is a lightweight Foundry VTT module that adds a draggable window with interactive coins. These coins represent a shared narrative resource between the GM and players—perfect for tracking narrative control, advantage, or momentum, inspired by systems like Genesys or Star Wars FFG.
-Features
+Story Points is a lightweight module for Foundry VTT that adds a draggable window with interactive coins. These coins represent a shared narrative resource between the GM and players—perfect for tracking narrative control, momentum, or advantage in systems like Genesys or Star Wars FFG.
+✨ Features
 
-     Add multiple interactive coins to the screen.
+    Add multiple interactive coins to the screen
 
-     Click to flip each coin between the GM and Player side.
+    Click a coin to flip it between GM and Player sides
 
-     Chat messages announce who flipped which coin and to what.
+    Sends a chat message showing who flipped what
 
-     Visual updates in real time for all users (no refresh needed).
+    Real-time sync for all users—no refresh needed
 
-     Only the GM can flip coins to the Player side (optional rule).
+    Only the GM can flip coins to Player side
 
-     Flip sound effect for satisfying feedback.
+    Includes a flip sound effect
 
-     Draggable floating window to place the tracker wherever you want.
+    Draggable floating window that stays on top of the UI
 
- Installation
+    GM-only control panel to set the number of coins (1–20)
+
+    Fully customizable icons and sound
+
+🛠️ Installation
 
     Download or clone this repository.
 
-    Copy the contents to your Foundry VTT Data/modules/story-points folder.
+    Copy the contents into your Foundry VTT Data/modules/story-points folder.
 
-    Enable the module from Settings > Manage Modules.
+    Enable the module in-game under Settings > Manage Modules.
 
- Usage
+🎮 Usage
 
 Once enabled:
 
-    A floating window with 3 coins will appear on screen.
+    A floating window with coins appears on screen.
 
-    Click a coin to flip it between GM and Player sides.
+    Click any coin to flip it between GM and Player.
 
-    All users see the same state, updated in real time.
+    Everyone sees the same state instantly.
 
     A chat message logs each flip and who flipped it.
 
- Customization
+    As GM, you can open the Story Points panel to set how many coins appear (1 to 20). The number updates for everyone live.
 
-Want to use your own coin graphics?
+🎨 Customization
 
-Replace these files:
+Coin Faces:
+Replace these files with your own transparent PNGs (64x64 or larger recommended):
 
-     modules/story-points/icons/player.png
+    modules/story-points/icons/player.png
 
-     modules/story-points/icons/gm.png
+    modules/story-points/icons/gm.png
 
- Recommended: Transparent PNGs at least 64x64 pixels.
- Sound Effect
+Flip Sound:
+Replace this file to change the flip sound:
 
-To customize the flip sound, replace:
+    modules/story-points/sounds/flip.ogg
 
-     modules/story-points/sounds/flip.ogg
+✅ Compatibility
 
- Adding More Coins
+    Works with Foundry VTT v10 through v13+
 
-Want more than 3 coins? It’s easy!
+    Has no dependencies
 
-Open the module’s story-points.js file.
-
-Locate the coinStates object near the top:
-
-     let coinStates = {
-       coin1: "gm",
-       coin2: "gm",
-       coin3: "gm"
-     };
-
-Add more coins by following the same format:
-
-    let coinStates = {
-      coin1: "gm",
-      coin2: "gm",
-      coin3: "gm",
-      coin4: "gm",  // Add as many as you want
-      coin5: "gm"
-    };
-
-Each coin will appear in the floating window automatically and behave the same way.
-
- You can rename the coin IDs (e.g., destiny1, threatToken, etc.)—they’ll still sync and work just fine.
-
- Compatibility
-
-    Compatible with Foundry VTT v10–v13+.
-
-    Does not require any dependencies.
-
- Credit
+🙌 Credit
 
 Created by @ipmillar
-Ko-fi: ipmillar — If you’d like to toss a coin to your dev 
+☕ ko-fi.com/ipmillar — Toss a coin to your dev
