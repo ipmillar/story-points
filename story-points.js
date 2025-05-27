@@ -1,23 +1,25 @@
-// story-points.js - Multi-coin Story Point Tracker with Flip Animation
+// story-points.js - Multi-coin Story Point Tracker with Flip Animation, Sound, and GM Coin Count Control
 
 const MODULE_ID = "story-points";
 const SOCKET_NAME = "module.story-points";
 const FLIP_SOUND_PATH = `modules/${MODULE_ID}/sounds/flip.ogg`;
 
-function playFlipSound() {
-  AudioHelper.play({ src: FLIP_SOUND_PATH, volume: 0.8, autoplay: true, loop: false }, true);
+let coinStates = {};
+
+function initializeCoinStates(count) {
+  coinStates = {};
+  for (let i = 1; i <= count; i++) {
+    coinStates[`coin${i}`] = "gm";
+  }
 }
 
+function updateAllClientsCoinCount(count) {
+  initializeCoinStates(count);
+  const container = document.getElementById("story-points-container");
+  if (container) container.remove();
+  createFloatingWindow();
+}
 
-
-// Initial coin states (3 coins for now)
-let coinStates = {
-  coin1: "gm",
-  coin2: "gm",
-  coin3: "gm"
-};
-
-// Create the floating UI window
 function createFloatingWindow() {
   let container = document.getElementById("story-points-container");
   if (!container) {
@@ -37,10 +39,7 @@ function createFloatingWindow() {
     makeDraggable(container);
   }
 
-  // Render each coin
-  Object.keys(coinStates).forEach(coinId => {
-    renderCoin(coinId);
-  });
+  Object.keys(coinStates).forEach(renderCoin);
 }
 
 function renderCoin(coinId) {
@@ -82,11 +81,14 @@ function renderCoin(coinId) {
   coin.title = `Click to flip (${coinId})`;
 }
 
+function playFlipSound() {
+  AudioHelper.play({ src: FLIP_SOUND_PATH, volume: 0.8, autoplay: true, loop: false }, true);
+}
+
 function flipCoin(coinId) {
   const currentState = coinStates[coinId];
   const newState = currentState === "gm" ? "player" : "gm";
 
-  // Only GM can flip from GM to PLAYER
   if (currentState === "gm" && newState === "player" && !game.user.isGM) {
     ui.notifications.warn("Only the GM can flip the coin to PLAYER.");
     return;
@@ -156,9 +158,70 @@ function makeDraggable(element) {
   }
 }
 
+function createGMControlPanel() {
+  if (!game.user.isGM) return;
+
+  let panel = document.createElement("div");
+  panel.id = "story-points-gm-panel";
+  panel.style.position = "absolute";
+  panel.style.top = "200px";
+  panel.style.left = "100px";
+  panel.style.zIndex = 10001;
+  panel.style.background = "#222";
+  panel.style.color = "#fff";
+  panel.style.border = "1px solid #555";
+  panel.style.borderRadius = "6px";
+  panel.style.minWidth = "auto";
+  panel.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #444; padding: 4px; border-bottom: 1px solid #555; cursor: move;">
+      <strong style="font-size: 14px;">Story Points</strong>
+      <button style="background: none; border: none; color: #fff; font-weight: bold; cursor: pointer;" title="Close">×</button>
+    </div>
+    <div style="padding: 6px;">
+      <label>Coins: <input type="number" min="1" max="20" value="${Object.keys(coinStates).length}" style="width: 40px;"/></label>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  const input = panel.querySelector("input");
+  input.addEventListener("change", () => {
+    const newCount = Math.max(1, Math.min(20, parseInt(input.value)));
+    game.settings.set(MODULE_ID, "coinCount", newCount);
+    game.socket.emit(SOCKET_NAME, { updateAll: true, coinCount: newCount });
+    updateAllClientsCoinCount(newCount);
+  });
+
+  const closeButton = panel.querySelector("button");
+  closeButton.addEventListener("click", () => {
+    panel.remove();
+  });
+
+  makeDraggable(panel);
+}
+
+Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "coinCount", {
+    name: "Coin Count",
+    scope: "world",
+    config: false,
+    type: Number,
+    default: 3
+  });
+});
+
 Hooks.once("ready", () => {
   if (!game.socket) return;
-  game.socket.on(SOCKET_NAME, applyCoinState);
+  game.socket.on(SOCKET_NAME, (data) => {
+    if (data.updateAll && data.coinCount !== undefined) {
+      updateAllClientsCoinCount(data.coinCount);
+    } else if (data.coinId && data.newState) {
+      applyCoinState(data);
+    }
+  });
+
+  const count = game.settings.get(MODULE_ID, "coinCount");
+  initializeCoinStates(count);
   createFloatingWindow();
+  createGMControlPanel();
 });
 
