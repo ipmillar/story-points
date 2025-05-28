@@ -1,4 +1,4 @@
-// story-points.js - Multi-coin Story Point Tracker with Flip Animation, Sound, and GM Coin Count Control
+// story-points.js - Multi-coin Story Point Tracker with Flip Animation, Sound, and GM Coin Count Control + Gear Toggle + Style Selector
 
 const MODULE_ID = "story-points";
 const SOCKET_NAME = "module.story-points";
@@ -7,10 +7,21 @@ const FLIP_SOUND_PATH = `modules/${MODULE_ID}/sounds/flip.ogg`;
 let coinStates = {};
 
 function initializeCoinStates(count) {
-  coinStates = {};
   for (let i = 1; i <= count; i++) {
-    coinStates[`coin${i}`] = "gm";
+    const saved = game.settings.get(MODULE_ID, `coinState${i}`);
+    coinStates[`coin${i}`] = saved || "gm";
   }
+  Object.keys(coinStates).forEach((key) => {
+    const num = parseInt(key.replace("coin", ""), 10);
+    if (num > count) {
+      delete coinStates[key];
+      game.settings.set(MODULE_ID, `coinState${num}`, undefined);
+    }
+  });
+}
+
+function getCoinStyle() {
+  return CONFIG[MODULE_ID]?.coinStyleOverride || game.settings.get(MODULE_ID, "coinStyle") || "fantasy";
 }
 
 function updateAllClientsCoinCount(count) {
@@ -35,10 +46,29 @@ function createFloatingWindow() {
     container.style.gap = "10px";
     container.style.cursor = "default";
     document.body.appendChild(container);
-
     makeDraggable(container);
-  }
 
+    if (game.user.isGM) {
+      const gear = document.createElement("img");
+      gear.src = `modules/${MODULE_ID}/icons/gear.png`;
+      gear.style.width = "20px";
+      gear.style.height = "20px";
+      gear.style.cursor = "pointer";
+      gear.style.position = "absolute";
+      gear.style.top = "-10px";
+      gear.style.right = "-10px";
+      gear.title = "GM Settings";
+      gear.addEventListener("click", () => {
+        const existingPanel = document.getElementById("story-points-gm-panel");
+        if (existingPanel) {
+          existingPanel.remove();
+        } else {
+          createGMControlPanel();
+        }
+      });
+      container.appendChild(gear);
+    }
+  }
   Object.keys(coinStates).forEach(renderCoin);
 }
 
@@ -47,6 +77,8 @@ function renderCoin(coinId) {
   if (!container) return;
 
   let coin = document.getElementById(`story-point-${coinId}`);
+  const style = getCoinStyle();
+
   if (!coin) {
     coin = document.createElement("img");
     coin.id = `story-point-${coinId}`;
@@ -76,7 +108,7 @@ function renderCoin(coinId) {
     container.appendChild(coin);
   }
 
-  coin.src = `modules/${MODULE_ID}/icons/${coinStates[coinId]}.png`;
+  coin.src = `modules/${MODULE_ID}/icons/coins/${style}/${coinStates[coinId]}.png`;
   coin.alt = coinStates[coinId];
   coin.title = `Click to flip (${coinId})`;
 }
@@ -100,17 +132,19 @@ function flipCoin(coinId) {
     playFlipSound();
     setTimeout(() => {
       coinStates[coinId] = newState;
+      if (game.user.isGM) game.settings.set(MODULE_ID, `coinState${coinId.replace("coin", "")}`, newState);
       renderCoin(coinId);
       coin.style.transform = "rotateY(0deg)";
     }, 200);
   } else {
     coinStates[coinId] = newState;
+    if (game.user.isGM) game.settings.set(MODULE_ID, `coinState${coinId.replace("coin", "")}`, newState);
     renderCoin(coinId);
   }
 
   const user = game.user?.name || "Someone";
   const readableId = coinId.replace(/coin(\d+)/, "coin $1");
-  const message = `${user} flipped ${readableId} to ${newState.toUpperCase()}`;
+  const message = `${user} flipped ${readableId} to the ${newState === "gm" ? "GM's" : "Player's"} side`;
   ChatMessage.create({ content: message });
 
   game.socket.emit(SOCKET_NAME, { coinId, newState });
@@ -123,11 +157,13 @@ function applyCoinState({ coinId, newState }) {
     playFlipSound();
     setTimeout(() => {
       coinStates[coinId] = newState;
+  if (game.user.isGM) game.settings.set(MODULE_ID, `coinState${coinId.replace("coin", "")}`, newState);
       renderCoin(coinId);
       coin.style.transform = "rotateY(0deg)";
     }, 200);
   } else {
     coinStates[coinId] = newState;
+    game.settings.set(MODULE_ID, `coinState${coinId.replace("coin", "")}`, newState);
     renderCoin(coinId);
   }
 }
@@ -158,13 +194,44 @@ function makeDraggable(element) {
   }
 }
 
+Hooks.once("init", () => {
+  game.settings.register(MODULE_ID, "coinCount", {
+    name: "Number of Coins",
+    default: 3,
+    type: Number,
+    scope: "world",
+    config: false,
+  });
+
+  game.settings.register(MODULE_ID, "coinStyle", {
+    name: "Coin Style",
+    default: "fantasy",
+    type: String,
+    scope: "world",
+    config: false,
+  });
+
+  for (let i = 1; i <= 20; i++) {
+    game.settings.register(MODULE_ID, `coinState${i}`, {
+      name: `Coin ${i} State`,
+      default: "gm",
+      type: String,
+      scope: "world",
+      config: false,
+    });
+  }
+});
+
 function createGMControlPanel() {
   if (!game.user.isGM) return;
 
-  let panel = document.createElement("div");
+  const existing = document.getElementById("story-points-gm-panel");
+  if (existing) return;
+
+  const panel = document.createElement("div");
   panel.id = "story-points-gm-panel";
   panel.style.position = "absolute";
-  panel.style.top = "200px";
+  panel.style.top = "160px";
   panel.style.left = "100px";
   panel.style.zIndex = 10001;
   panel.style.background = "#222";
@@ -177,11 +244,22 @@ function createGMControlPanel() {
       <strong style="font-size: 14px;">Story Points</strong>
       <button style="background: none; border: none; color: #fff; font-weight: bold; cursor: pointer;" title="Close">×</button>
     </div>
-    <div style="padding: 6px;">
+    <div style="padding: 6px; display: flex; flex-direction: column; gap: 6px;">
       <label>Coins: <input type="number" min="1" max="20" value="${Object.keys(coinStates).length}" style="width: 40px;"/></label>
+      <label>Style:
+        <select id="coin-style-select">
+          <option value="fantasy">Fantasy</option>
+          <option value="minimalist">Minimalist</option>
+          <option value="modern">Modern</option>
+          <option value="sci-fi">Sci-Fi</option>
+          <option value="steampunk">Steampunk</option>
+        </select>
+      </label>
     </div>
   `;
   document.body.appendChild(panel);
+
+  panel.querySelector("#coin-style-select").value = getCoinStyle();
 
   const input = panel.querySelector("input");
   input.addEventListener("change", () => {
@@ -189,6 +267,18 @@ function createGMControlPanel() {
     game.settings.set(MODULE_ID, "coinCount", newCount);
     game.socket.emit(SOCKET_NAME, { updateAll: true, coinCount: newCount });
     updateAllClientsCoinCount(newCount);
+  });
+
+  const styleSelect = panel.querySelector("#coin-style-select");
+  styleSelect.addEventListener("change", () => {
+    const newStyle = styleSelect.value;
+    if (game.user.isGM) {
+      game.settings.set(MODULE_ID, "coinStyle", newStyle);
+    }
+    CONFIG[MODULE_ID] = CONFIG[MODULE_ID] || {};
+    CONFIG[MODULE_ID].coinStyleOverride = newStyle;
+    game.socket.emit(SOCKET_NAME, { newStyle });
+    updateAllClientsCoinCount(Object.keys(coinStates).length);
   });
 
   const closeButton = panel.querySelector("button");
@@ -199,29 +289,23 @@ function createGMControlPanel() {
   makeDraggable(panel);
 }
 
-Hooks.once("init", () => {
-  game.settings.register(MODULE_ID, "coinCount", {
-    name: "Coin Count",
-    scope: "world",
-    config: false,
-    type: Number,
-    default: 3
-  });
-});
 
 Hooks.once("ready", () => {
   if (!game.socket) return;
   game.socket.on(SOCKET_NAME, (data) => {
     if (data.updateAll && data.coinCount !== undefined) {
       updateAllClientsCoinCount(data.coinCount);
+    } else if (data.newStyle) {
+      CONFIG[MODULE_ID] = CONFIG[MODULE_ID] || {};
+      CONFIG[MODULE_ID].coinStyleOverride = data.newStyle;
+      updateAllClientsCoinCount(Object.keys(coinStates).length);
     } else if (data.coinId && data.newState) {
       applyCoinState(data);
     }
   });
 
-  const count = game.settings.get(MODULE_ID, "coinCount");
-  initializeCoinStates(count);
+  const coinCount = game.settings.get(MODULE_ID, "coinCount") || 3;
+  initializeCoinStates(coinCount);
   createFloatingWindow();
-  createGMControlPanel();
 });
 
