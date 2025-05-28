@@ -1,69 +1,83 @@
 🪙 Story Points – Foundry VTT Module
 
-Story Points is a lightweight module for Foundry VTT that adds a draggable window with interactive coins. These coins represent a shared narrative resource between the GM and players—perfect for tracking narrative control, momentum, or advantage in systems like Genesys or Star Wars FFG.
+Story Points is a lightweight module for Foundry VTT that adds a draggable window with interactive coins. These coins represent a shared narrative resource between the GM and players—perfect for tracking control, momentum, or advantage in systems like Genesys or Star Wars FFG.
 ✨ Features
 
-    Add multiple interactive coins to the screen
+    🪙 Add multiple interactive coins to the screen (1–20)
 
-    Click a coin to flip it between GM and Player sides
+    🎯 Click a coin to flip it between the GM’s and Player’s side
 
-    Sends a chat message showing who flipped what
+    💬 Automatically sends a chat message when flipped (e.g., "Alex flipped coin 3 to the Player’s side")
 
-    Real-time sync for all users—no refresh needed
+    🌐 Real-time sync between GM and all players
 
-    Only the GM can flip coins to Player side
+    🔒 Only the GM can flip coins to the Player side
 
-    Includes a flip sound effect
+    🔊 Includes a flip sound effect for satisfying feedback
 
-    Draggable floating window that stays on top of the UI
+    🖱️ Fully draggable UI window that stays on top
 
-    GM-only control panel to set the number of coins (1–20)
+    ⚙️ A GM-only gear icon opens the control panel
 
-    Fully customizable icons and sound
+    🧮 Control panel lets the GM set the number of coins and coin style
+
+    🧠 Coin states persist across sessions and world restarts
+
+    🎨 Fully customizable icons and sound
 
 🛠️ Installation
 
-    Download or clone this repository.
+    Download or clone the repository
 
-    Copy the contents into your Foundry VTT Data/modules/story-points folder.
+    Copy it into your FoundryVTT/Data/modules/story-points folder
 
-    Enable the module in-game under Settings > Manage Modules.
+    Enable the module in Foundry:
+    Settings > Manage Modules > Story Points
 
 🎮 Usage
 
 Once enabled:
 
-    A floating window with coins appears on screen.
+    A floating window with coins appears on screen
 
-    Click any coin to flip it between GM and Player.
+    Click a coin to flip it between GM and Player
 
-    Everyone sees the same state instantly.
+    A chat message logs each flip and who flipped it
 
-    A chat message logs each flip and who flipped it.
+GM Control Panel
 
-    As GM, you can open the Story Points panel to set how many coins appear (1 to 20). The number updates for everyone live.
+    A gear icon appears in the top-right of the coin tracker (GM only)
+
+    Click it to open the control panel:
+
+        Set the number of coins (1–20)
+
+        Choose from multiple coin styles (fantasy, sci-fi, minimalist, modern, steampunk)
+    
 
 🎨 Customization
+Coin Faces
 
-Coin Faces:
-Replace these files with your own transparent PNGs (64x64 or larger recommended):
+Replace these files with your own transparent PNGs (64×64 or larger recommended):
 
-    modules/story-points/icons/player.png
+    modules/story-points/icons/coins/<style>/player.png
+    modules/story-points/icons/coins/<style>/gm.png
 
-    modules/story-points/icons/gm.png
+Flip Sound
 
-Flip Sound:
-Replace this file to change the flip sound:
+Replace this file to change the sound effect:
 
     modules/story-points/sounds/flip.ogg
 
 ✅ Compatibility
 
-    Works with Foundry VTT v10 through v13+
+    ✅ Foundry VTT v10–v13+
 
-    Has no dependencies
+    🧩 No dependencies required
+
+    💾 States persist across sessions
 
 🙌 Credit
 
 Created by @ipmillar
-☕ ko-fi.com/ipmillar — Toss a coin to your dev
+☕ ko-fi.com/ipmillar — Toss a coin to your dev!
