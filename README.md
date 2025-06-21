@@ -52,7 +52,7 @@ GM Control Panel
 
         Set the number of coins (1–20)
 
-        Choose from multiple coin styles (fantasy, sci-fi, minimalist, modern, steampunk)
+        Choose from multiple coin styles (fantasy, sci-fi, minimalist, modern, steampunk, destiny points, and feather tokens)
     
 
 🎨 Customization
