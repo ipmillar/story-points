@@ -253,6 +253,8 @@ function createGMControlPanel() {
           <option value="modern">Modern</option>
           <option value="sci-fi">Sci-Fi</option>
           <option value="steampunk">Steampunk</option>
+          <option value="destiny-points">Destiny Points</option>
+          <option value="feather-token">Feather Token</option>
         </select>
       </label>
     </div>
